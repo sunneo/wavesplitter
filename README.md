@@ -1,23 +1,21 @@
 * Wave Splitter 
 
 This tool aims at providing simple way to split single sound wave file into several sound wave files.
-
 Basically, the input text file is in a format as following:
 ===============================================================================
-cut_volume 0.03 ; sound below this volume is so called cut-point
-cut_mute 1.10 ; as cut-point continues 1.10 seconds, the next sound louder than cut_volume is considered next sound
-mute 1.10  ; fill 1.10 seconds at generated sound file
-auto_gen _c ; use _c as surfix for generated sound file
-add_head 0 ; insert 0 seconds padding in front of every cut, padding is sampled from original sound file. As playing, this region is represented by faded-in effect.
-add_end 0 ; append 0 seconds period padding after every cut, padding is sampled from original sound file. As playing, this region is represented by faded-out effect.
-* ; start region
-abandon  ; file name 1
-abbreviate ; file name 2
-abbreviation  ; file name 3 
-abdomen  ; ...
-abide  ; you can add as much file name as you want.
-
-# ; end of file name region
+ cut_volume 0.03 ; sound below this volume is so called cut-point
+ cut_mute 1.10 ; as cut-point continues 1.10 seconds, the next sound louder than cut_volume is considered next sound
+ mute 1.10  ; fill 1.10 seconds at generated sound file
+ auto_gen _c ; use _c as surfix for generated sound file
+ add_head 0 ; insert 0 seconds padding in front of every cut, padding is sampled from original sound file. As playing, this region is represented by faded-in effect.
+ add_end 0 ; append 0 seconds period padding after every cut, padding is sampled from original sound file. As playing, this region is represented by faded-out effect.
+ * ; start region
+ abandon  ; file name 1
+ abbreviate ; file name 2
+ abbreviation  ; file name 3 
+ abdomen  ; ...
+ abide  ; you can add as much file name as you want.
+ # ; end of file name region
 ===============================================================================
 
 * The ';' semi-colon indicates a begin of comment-line, words after this symbol won't take effect on our parser
