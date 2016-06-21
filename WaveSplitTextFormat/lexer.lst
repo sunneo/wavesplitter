@@ -1,0 +1,79 @@
+
+// ==========================================================================
+//  GPLEX error listing for lex source file <lexer.l>
+// ==========================================================================
+//  Version:  1.1.5.305
+//  Machine:  WIN-34SHIOK28G3
+//  DateTime: 2016/5/25 下午 04:11:27
+//  UserName: HungFu Lee
+// ==========================================================================
+
+
+%namespace WaveTextFormatter
+
+%{
+private int totalLines;
+private bool isDebug=true;
+ParserStatus parserStatus;
+private Parser currentParser;
+private void DebugOut(String s){
+   if(isDebug){
+     Console.WriteLine(s);
+   }
+}
+
+%}
+
+UniAnyChar [\0-\x7F]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEF][\x80-\xBF][\x80-\xBF]
+utf_8   {u2a}|{u2b}|{u3a}|{u3b}|{u4a}|{u4b}|{u4c}
+//-------^^^
+// Error: Unknown lexical category <u2a> 
+// --------------------------------------
+WORD				([a-zA-Z\_][a-zA-Z0-9_]*)
+FSWORD				[a-zA-Z0-9_\.\?\+\-\$\(\)\!\%]*
+FILESEP				("/"|"\\")
+EXTENSION			[a-zA-Z0-9_\-]+
+WhiteSpace          [\t ]+
+NEWLINE	((\n)|(\r\n))
+COMMENTLINE	(;+.*{NEWLINE})
+Space               \x20
+DIRNAME				{FSWORD}
+FILE				{FSWORD}(\.({EXTENSION})?)
+RELATIVEPATH		{DIRNAME}({FILESEP}{DIRNAME})*
+PATH				{RELATIVEPATH}
+FULLFILENAME		([a-zA-Z]":\\")(({PATH}{FILESEP})*{FILE})
+FULLFILEDIR			([a-zA-Z]":\\")(({PATH}{FILESEP})*{PATH})
+FILENAME			(({PATH}{FILESEP})?{FILE})|(({RELATIVEPATH}{FILESEP})?{FILE})
+KEYWORDS			("input_directory")|("output_directory")|("cut_volume")|("cut_mute")|("mute")|("auto_gen")|("add_head")|("add_end")
+KEYWORDS_TEMP		("$cut_volume_temp")|("$cut_mute_temp")|("$mute_temp")|("$auto_gen_temp")|("$add_head_temp")|("$add_end_temp")
+%%
+{WhiteSpace} {DebugOut("WHITESPACE "+yytext.Length);}
+{NEWLINE}	{						
+				totalLines += 1; 
+				parserStatus.CurrentLine=totalLines;
+				      DebugOut("NEWLINE\\n"); 
+					  return (int)Tokens.NEWLINE; 
+			}
+{COMMENTLINE}		{										
+							totalLines += 1; 
+					}
+"*"	{DebugOut("STAR "+yytext); yylval.stringVal=yytext; return (int)Tokens.STAR; }
+"#"	{DebugOut("SHARP "+yytext); yylval.stringVal=yytext; return (int)Tokens.SHARP; }
+[\-]?((0\.[0-9]*)|([1-9][0-9]*\.[0-9]*))	{DebugOut("FLOATVALUE "+yytext); yylval.stringVal=yytext; return (int)Tokens.FLOATVALUE; }
+([0-9]|[1-9][0-9]*)	{DebugOut("DIGIT "+yytext); yylval.stringVal=yytext; return (int)Tokens.DIGIT; }
+{KEYWORDS} {DebugOut("WORD "+yytext); yylval.stringVal=yytext; return (int)Tokens.KEYWORDS; }
+{KEYWORDS_TEMP} {DebugOut("KEYWORDS_TEMP "+yytext); yylval.stringVal=yytext; return (int)Tokens.KEYWORDS_TEMP; }
+{WORD}	{DebugOut("WORD "+yytext); yylval.stringVal=yytext; return (int)Tokens.WORD; }
+(L?\"(\\.|[^\\"])*\")|(L?\'(\\.|[^\\"])*\')		{DebugOut(yytext); yylval.stringVal=yytext; return (int)Tokens.STRING;}
+{FULLFILENAME}|{FULLFILEDIR}	{DebugOut("FULLFILENAME "+yytext); yylval.stringVal=yytext.Trim(); yylval.line=totalLines;yylval.token=Tokens.FILENAME; return (int)Tokens.FILENAME; }
+. {DebugOut("Unknown Character "+yytext+" code="+(int)yytext[0]); }
+
+%%
+public Scanner(Stream file,ParserStatus s){
+    SetSource(file);
+	this.parserStatus=s;
+}
+public void SetParser(Parser parser){
+   this.currentParser=parser;
+}// ==========================================================================
+
